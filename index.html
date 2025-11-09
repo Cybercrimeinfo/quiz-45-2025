@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>De Wekelijkse Digitale Weerbaarheid Quiz — Week 45-2025</title>
+  <style>
+    :root { --maxw: 960px; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; line-height: 1.5; margin: 0; background: #0b1220; color: #e8eef8; }
+    a { color: inherit; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 24px; }
+    header { padding: 16px 0 8px; }
+    h1 { font-size: clamp(1.4rem, 2.5vw, 2rem); margin: 0 0 4px; }
+    .sub { opacity: .8; font-size: .95rem; margin-bottom: 16px; }
+    .card { background: #121a2b; border: 1px solid #29324a; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+    .card .in { padding: 20px; }
+    .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+    button { cursor: pointer; border: 0; padding: 10px 16px; border-radius: 12px; font-weight: 600; }
+    .btn-primary { background: #3a86ff; color: white; }
+    .btn-secondary { background: #2a334a; color: #e8eef8; }
+    .btn-danger { background: #ef476f; color: white; }
+    .muted { opacity: .75; }
+
+    .q { padding: 18px; border: 1px solid #233153; border-radius: 12px; margin-bottom: 16px; background: #0f1526; }
+    .q h3 { margin: 0 0 6px; font-size: 1.05rem; }
+    .q .meta { font-size: .85rem; opacity: .8; margin-bottom: 8px; }
+    .options { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    label.opt { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: start; padding: 10px; border-radius: 10px; border: 1px solid #223153; background: #0c1222; }
+    input[type="radio"] { transform: translateY(2px); }
+    .result { margin-top: 20px; padding: 16px; border-radius: 12px; border: 1px solid #2a3b66; background: #0c1426; }
+    .stat { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 8px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .8rem; font-weight: 700; }
+    .ok { background: #144d2a; color: #a6f4c5; }
+    .ko { background: #5b1d2b; color: #fec5d0; }
+    .warn { background: #42340b; color: #ffe5a1; }
+    .perq { border-top: 1px dashed #2d3d64; padding-top: 12px; margin-top: 12px; }
+    .perq h4 { margin: 0 0 6px; font-size: .95rem; }
+    .key { opacity: .9; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    footer { margin: 32px 0; opacity: .7; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>De Wekelijkse Digitale Weerbaarheid Quiz: Week 45-2025</h1>
+      <div class="sub">Periode: 3 t/m 9 november 2025 · 20 meerkeuzevragen · bron: Journaals Cybercrimeinfo https://www.ccinfo.nl/journaal</div>
+    </header>
+
+    <section class="card">
+      <div class="in">
+        <div id="quiz"></div>
+        <div class="actions">
+          <button id="submit" class="btn-primary">Inleveren en nakijken</button>
+          <button id="reset" class="btn-secondary">Opnieuw beginnen</button>
+          <span class="muted" id="progress"></span>
+        </div>
+        <div id="result" class="result" hidden></div>
+      </div>
+    </section>
+
+    <footer>
+      © Week 45-2025 Cybercrimeinfo quiz
+    </footer>
+  </div>
+
+  <script>
+    // ————————————————
+    //  Quiz data (Week 45-2025)
+    // ————————————————
+    const QUESTIONS = [
+      {cat:"Actuele Cyberaanvallen en Datalekken", q:"Welke ransomwaregroep heeft de verantwoordelijkheid opgeëist voor de aanval op Ansell, een wereldwijd bedrijf in beschermingsoplossingen, waarbij activiteiten wereldwijd werden verstoord?", opts:{A:"LockBit", B:"BlackCat (ALPHV)", C:"Clop", D:"Sandworm"}, a:"C"},
+      {cat:"Actuele Cyberaanvallen en Datalekken", q:"Welke persoonsgegevens van inwoners van Schiermonnikoog zijn buitgemaakt bij de ransomwareaanval op afvalverwerker Omrin?", opts:{A:"Alleen namen en adressen van recreatiewoningeigenaren", B:"Alleen bankrekeningnummers en wachtwoorden", C:"Namen, adressen en BSN-nummers van eilandbewoners en eigenaren van recreatiewoningen", D:"Bedrijfsgegevens en IP-adressen van de gemeenteraad"}, a:"C"},
+      {cat:"Malware en Nieuwe Technieken", q:"De Noord-Koreaanse hackergroep Famous Chollima gebruikte deepfakes bij valse sollicitatiegesprekken. Wat ontmaskerde de nep sollicitanten?", opts:{A:"Ze spraken Chinees in plaats van Mexicaans-Spaans", B:"Hun mond stond stil tijdens het praten", C:"Ze gebruikten een VPN-dienst gelinkt aan Rusland", D:"De deepfakes waren niet in kleur"}, a:"B"},
+      {cat:"Kritieke Kwetsbaarheden en Patches", q:"Hoeveel kwetsbare DNS-servers in Nederland misten op 3 november 2025 nog steeds een essentiële beveiligingsupdate voor BIND 9?", opts:{A:"18 servers", B:"591 servers", C:"74 servers", D:"Meer dan 8200 servers"}, a:"C"},
+      {cat:"Malware en Nieuwe Technieken", q:"Welke term wordt gebruikt voor de opkomende vorm van sociale manipulatie waarbij AI wordt ingezet om de toon, timing en persoonlijkheid van aanvallers te gebruiken om slachtoffers te misleiden?", opts:{A:"Deepfake phishing", B:"Vibe hacking", C:"AI-driven ransomware", D:"PromptSteal"}, a:"B"},
+      {cat:"Dreigingen in Cyberspace", q:"Welke hacktivistische groep heeft de verantwoordelijkheid opgeëist voor meerdere DDoS-aanvallen op Belgische overheidswebsites en vitale infrastructuren, waaronder citydev[.]brussels, VIVAQUA, ENGIE Electrabel en de Haven van Antwerpen-Brugge?", opts:{A:"Server Killers", B:"NoName", C:"HEZI RASH", D:"TwoNet"}, a:"B"},
+      {cat:"Actuele Cyberaanvallen en Datalekken", q:"Wat was het extreem simpele wachtwoord dat toegang gaf tot de videobewakingsserver van het Louvre, wat bijdroeg aan de diefstal van juwelen ter waarde van bijna €90 miljoen?", opts:{A:"'Password123'", B:"'123456'", C:"'ParIjs2025'", D:"'LOUVRE'"}, a:"D"},
+      {cat:"Kritieke Kwetsbaarheden en Patches", q:"Welke kritieke kwetsbaarheid in de Post SMTP WordPress-plug-in stelt ongeauthenticeerde aanvallers in staat om beheerderaccounts over te nemen?", opts:{A:"Een fout in de check_login functie (CVE-2025-5397)", B:"Het kunnen uitlezen van e-mail logbestanden, inclusief links voor wachtwoord reset (CVE-2025-11833)", C:"Remote code execution via de Metro ontwikkelserver (CVE-2025-11953)", D:"Privilege escalation via REST API tokens (CVE-2025-11749)"}, a:"B"},
+      {cat:"Malware en Nieuwe Technieken", q:"Welke malware gebruikt de OpenAI Assistants API als een verborgen command-and-control kanaal om langdurige toegang tot besmette systemen te behouden?", opts:{A:"PromptSteal", B:"BankBot-YNRK", C:"SesameOp", D:"Herodotus"}, a:"C"},
+      {cat:"Actuele Cyberaanvallen en Datalekken", q:"Waarvan wordt de Russische hackergroep Sandworm beschuldigd in Oekraïne, specifiek gericht op de graansector?", opts:{A:"Het uitvoeren van DDoS-aanvallen op graanhandel websites", B:"Het gebruik van dataverwijderaars om cruciale gegevens permanent te vernietigen", C:"Het verspreiden van Clop ransomware op opslagsystemen", D:"Het stelen van graanrecepten en bedrijfsgeheimen"}, a:"B"},
+      {cat:"Malware en Nieuwe Technieken", q:"Waarom heeft Avans Hogeschool besloten de AI-functies Copilot en Samenvatten in Outlook te verbieden?", opts:{A:"De functies werkten niet goed met het hogeschoolnetwerk", B:"Ze verwerkten bedrijfsgevoelige informatie en persoonsgegevens, wat kon leiden tot datalekken", C:"De kosten van de AI-licenties waren te hoog", D:"Het uitschakelen van de functies beïnvloedde andere essentiële onderdelen van Outlook"}, a:"B"},
+      {cat:"Financieel Gemotiveerde Aanvallen", q:"Wat is een belangrijke verandering in de aanpak van financieel gemotiveerde aanvallers, zoals beschreven in de bronnen?", opts:{A:"Ze gebruiken steeds meer polymorfe AI-malware", B:"Ze vervangen traditionele malware-aanvallen door het misbruiken van gestolen inloggegevens en geldige accounttoegang", C:"Ze richten zich uitsluitend op Linux-systemen", D:"Ze gebruiken uitsluitend de LockBit 5.0 ransomware"}, a:"B"},
+      {cat:"Kritieke Kwetsbaarheden en Patches", q:"De kritieke kwetsbaarheid in Cisco Unified Contact Center Express (UCCX) software (CVE-2025-20354) stelde een ongeauthenticeerde aanvaller in staat tot:", opts:{A:"Alleen het stelen van gesprekslogs", B:"Het uitvoeren van een DDoS-aanval", C:"Het uploaden van willekeurige bestanden en commando’s met rootrechten uit te voeren", D:"Het deactiveren van de firewall"}, a:"C"},
+      {cat:"Malware en Nieuwe Technieken", q:"Wat is een belangrijk kenmerk van de nieuwe TruffleNet BEC-campagne die zich richt op onder andere de olieraffinage- en gasindustrie?", opts:{A:"Ze gebruiken een speciaal ontwikkelde XLoader variant", B:"Ze gebruiken gestolen AWS-credentials om phishing-aanvallen uit te voeren via de Amazon Simple Email Service (SES)", C:"Ze richten zich uitsluitend op het stelen van cryptocurrencies", D:"Ze exploiteren de Django SQL-injectie kwetsbaarheid"}, a:"B"},
+      {cat:"Malware en Nieuwe Technieken", q:"Wat maakt de aanpak van de Russische hacker-groep Curly COMrades (bijvoorbeeld in aanvallen op energiebedrijven) uniek met betrekking tot het verbergen van malware?", opts:{A:"Ze gebruiken het Tor-netwerk exclusief voor communicatie", B:"Ze verbergen malware in een Alpine Linux virtuele machine met behulp van Microsoft Hyper-V", C:"Ze gebruiken gestolen code-signing certificaten", D:"Ze misbruiken de Solana blockchain voor commando-uitvoering"}, a:"B"},
+      {cat:"Dreigingen in Cyberspace", q:"Volgens het Zscaler ThreatLabz-rapport 2025 was er een aanzienlijke stijging in IoT-aanvallen op welke publieke sector?", opts:{A:"De financiële sector", B:"Overheidsystemen (stijging van 370%)", C:"De chipindustrie (stijging van 147%)", D:"De auto-industrie"}, a:"B"},
+      {cat:"Kritieke Kwetsbaarheden en Patches", q:"Welke kwetsbaarheid in AMD Zen 5-processors kan de betrouwbaarheid van cryptografische willekeur aantasten?", opts:{A:"Een fout in de Graphics Device Interface (GDI)", B:"Een defect in de RDSEED-instructie die nulwaarden kan retourneren terwijl succes wordt aangegeven", C:"De kwetsbaarheid in Windows Server Update Services (WSUS)", D:"Een lek in de 64-bits versie van de RDSEED-instructie"}, a:"B"},
+      {cat:"Politiek en Beleid", q:"Wat is de belangrijkste taak van het panel onder leiding van Zico Kolter bij OpenAI?", opts:{A:"Het ontwikkelen van AI-modellen voor het nucleaire wapenprogramma", B:"Het stoppen van de release van onveilige AI-systemen als de risico's niet zijn gemitigeerd", C:"Het trainen van AI-modellen met Europese gebruikersdata van LinkedIn", D:"Het onderhandelen over losgeldbetalingen bij AI-gedreven ransomware-aanvallen"}, a:"B"},
+      {cat:"Malware en Nieuwe Technieken", q:"Welke geavanceerde functionaliteit introduceert LockBit 5.0, volgens de bronnen?", opts:{A:"Het gebruik van de Ethereum-blockchain voor C2-communicatie", B:"Een twee-fasen uitvoeringsmodel met een aparte loader- en payload-fase", C:"Exclusieve focus op IoT-apparaten", D:"Een gratis decryptor voor alle slachtoffers"}, a:"B"},
+      {cat:"Rechtspraak, Datalekken en Fraude", q:"Welke maatregel heeft Singapore genomen tegen online fraudeurs in nieuwe wetgeving, wat wordt gezien als een sterke afschrikking?", opts:{A:"Een verplichte boete van 3 miljard dollar", B:"De invoering van een minimale celstraf van 20 jaar", C:"De invoering van lijfstraffen (stokslagen)", D:"De verplichte registratie van ontwikkelaars met legitimatiebewijs"}, a:"C"}
+    ];
+
+    // ————————————————
+    //  Render quiz
+    // ————————————————
+    const $quiz = document.getElementById('quiz');
+    const $progress = document.getElementById('progress');
+    const $result = document.getElementById('result');
+    const $submit = document.getElementById('submit');
+    const $reset = document.getElementById('reset');
+
+    function render() {
+      $quiz.innerHTML = '';
+      QUESTIONS.forEach((it, idx) => {
+        const qId = `q${idx+1}`;
+        const wrap = document.createElement('div');
+        wrap.className = 'q';
+        wrap.innerHTML = `
+          <div class="meta">Categorie: <strong>${it.cat}</strong> · Vraag ${idx+1} van ${QUESTIONS.length}</div>
+          <h3>${it.q}</h3>
+          <div class="options">
+            ${Object.entries(it.opts).map(([key, val]) => `
+              <label class="opt" for="${qId}${key}">
+                <input type="radio" id="${qId}${key}" name="${qId}" value="${key}" />
+                <span><strong>${key})</strong> ${val}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        $quiz.appendChild(wrap);
+      });
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const answered = [...document.querySelectorAll('.q')].filter(q => q.querySelector('input[type=radio]:checked')).length;
+      $progress.textContent = `${answered}/${QUESTIONS.length} beantwoord`;
+    }
+
+    function firstUnanswered() {
+      for (let i=0;i<QUESTIONS.length;i++) {
+        const qId = `q${i+1}`;
+        if (!document.querySelector(`input[name=${CSS.escape(qId)}]:checked`)) return i;
+      }
+      return -1;
+    }
+
+    function disableAll() {
+      document.querySelectorAll('input[type=radio]').forEach(el => el.disabled = true);
+      $submit.disabled = true;
+    }
+
+    function enableAll() {
+      document.querySelectorAll('input[type=radio]').forEach(el => el.disabled = false);
+      $submit.disabled = false;
+      $result.hidden = true;
+    }
+
+    function resetAll() {
+      document.querySelectorAll('input[type=radio]:checked').forEach(el => el.checked = false);
+      document.querySelectorAll('.perq').forEach(el => el.remove());
+      enableAll();
+      updateProgress();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function grade() {
+      let score = 0;
+      // clear previous per-question feedback
+      document.querySelectorAll('.perq').forEach(el => el.remove());
+
+      QUESTIONS.forEach((it, idx) => {
+        const qId = `q${idx+1}`;
+        const chosen = document.querySelector(`input[name=${CSS.escape(qId)}]:checked`);
+        const correctLetter = it.a;
+        const correctText = it.opts[correctLetter];
+        const host = $quiz.children[idx];
+
+        const box = document.createElement('div');
+        box.className = 'perq';
+        if (chosen && chosen.value === correctLetter) {
+          score++;
+          box.innerHTML = `<div class="badge ok">✓ Goed</div> <span class="muted">Juiste optie: <span class="key">${correctLetter}) ${correctText}</span></

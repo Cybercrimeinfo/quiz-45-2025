@@ -170,4 +170,46 @@
         box.className = 'perq';
         if (chosen && chosen.value === correctLetter) {
           score++;
-          box.innerHTML = `<div class="badge ok">✓ Goed</div> <span class="muted">Juiste optie: <span class="key">${correctLetter}) ${correctText}</span></
+          box.innerHTML = `<div class="badge ok">✓ Goed</div> <span class="muted">Juiste optie: <span class="key">${correctLetter}) ${correctText}</span></span>`;
+        } else {
+          const user = chosen ? `${chosen.value}) ${it.opts[chosen.value]}` : '—';
+          box.innerHTML = `<div class="badge ko">✗ Fout</div> <span class="muted">Jouw keuze: <span class="key">${user}</span></span><br><span>Juiste antwoord: <span class="key">${correctLetter}) ${correctText}</span></span>`;
+        }
+        host.appendChild(box);
+      });
+
+      const pct = Math.round((score / QUESTIONS.length) * 100);
+      $result.hidden = false;
+      $result.innerHTML = `
+        <strong>Score</strong><br>
+        Je scoorde <strong>${score}</strong> van de <strong>${QUESTIONS.length}</strong> vragen (<strong>${pct}%</strong>).
+        <div class="stat">
+          <div><span class="badge ${pct>=80? 'ok': pct>=60? 'warn' : 'ko'}">${pct}%</span> Behaalde percentage</div>
+          <div><span class="badge">${new Date().toLocaleDateString('nl-NL')}</span> Ingevuld op</div>
+        </div>
+      `;
+    }
+
+    // Wire up
+    render();
+    document.addEventListener('change', (e) => {
+      if (e.target.matches('input[type=radio]')) updateProgress();
+    });
+
+    $submit.addEventListener('click', () => {
+      const i = firstUnanswered();
+      if (i !== -1) {
+        document.querySelectorAll('.q')[i].scrollIntoView({behavior:'smooth', block:'center'});
+        $result.hidden = false;
+        $result.innerHTML = '<span class="badge warn">Let op</span> Je hebt nog niet alle vragen beantwoord.';
+        return;
+      }
+      grade();
+      disableAll();
+      $result.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+
+    $reset.addEventListener('click', resetAll);
+  </script>
+</body>
+</html>
